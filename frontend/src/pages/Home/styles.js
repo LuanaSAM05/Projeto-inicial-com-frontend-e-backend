@@ -51,4 +51,3 @@ export const InputLabel = styled.label`
     font-weight: bold;
   }
 `;
-

@@ -1,57 +1,74 @@
 import api from '../../../services/api'
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import DefaultButton from '../../../components/Button'
-import TopBackground from '../../../components/Button/TopBackground';
+import TopBackground from '../../../components/Button/TopBackground'
+import Trash from '../../../assets/trash.svg'
 
+import {
+    Container,
+    Title,
+    ContainerUsers,
+    CardUsers,
+    TrashIcon,
+    AvatarUser
+} from './styles'
 
 function ListUsers() {
-
-    let users = [
-        {
-            age: 29,
-            email: "luanaebrenno@gmail.com",
-            id: "69669e2669c115ada1466658",
-            name: "Luana"
-        },
-
-        {
-            age: 33,
-            email: "abacate@gmail.com",
-            id: "696634hsk39e2669c115ada1466658",
-            name: "Abacate"
-        }
-    ];
+    const [users, setUsers] = useState([])
+    const navigate = useNavigate()
 
     useEffect(() => {
-
         async function getUsers() {
-            const { data } = await api.get('/usuarios');
-            console.log(data);
+            const { data } = await api.get('/usuarios')
+            setUsers(data)
         }
-        getUsers();
-    }, []);
 
-    // Toda vez que a tela carrega, o useEffect e chamado
-    // Toda vez que uma determinada variavel muda de valor, ele e chamado
+        getUsers()
+    }, [])
 
+    function handleGoBack() {
+        navigate('/') // 👈 rota da tela de cadastro
+    }
+
+    async function deleteUsers(id) {
+        await api.delete(`/usuarios/${id}`)
+
+        const updatedUsers = users.filter(user => user.id !== id)
+
+        setUsers(updatedUsers)
+    }
 
     return (
-        <div>
+        <Container>
             <TopBackground />
-            <h1>Lista de Usuários</h1>
+            <Title>Lista de Usuários</Title>
 
-            {users.map(user => (
-                <div>
-                    <p>{user.name}</p>
-                    <p>{user.age}</p>
-                    <p>{user.email}</p>
-                </div>
-            ))}
+            <ContainerUsers>
+                {users.map(user => (
+                    <CardUsers key={user.id}>
+                        <AvatarUser
+                            src={`https://api.dicebear.com/7.x/personas/svg?seed=${user.id}`}
+                            alt="avatar"
+                        />
 
-            <DefaultButton>Voltar</DefaultButton>
-        </div>
-    );
+                        <div>
+                            <h3>{user.name}</h3>
+                            <p>{user.age}</p>
+                            <p>{user.email}</p>
+                        </div>
+
+                        <TrashIcon src={Trash} alt="icone-lixo" onClick={() => deleteUsers(user.id)} />
+                    </CardUsers>
+                ))}
+            </ContainerUsers>
+
+            <DefaultButton type="button" onClick={handleGoBack}>
+                Voltar
+            </DefaultButton>
+        </Container>
+    )
 }
 
-export default ListUsers;
+export default ListUsers
